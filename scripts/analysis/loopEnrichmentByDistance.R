@@ -61,33 +61,25 @@ bg <- apply(counts(mats), c(3,4), \(x) median(x[idx] + 1))
 interactions(mats)$score <- cp / bg[,1]
 interactions(mats)$size <- pairdist(mats)
 
+## Function to calculate loop enrichment (from mariner)
+# enrich <- calcLoopEnrichment(
+#   x=loops,
+#   files=hicFile,
+#   mhDist=c(4,5,6)
+# )
+
 ## Visualize trend -------------------------------------------------------------
 
-## Data table of loop size and score
-dat <- data.table(
-  size = interactions(mats)$size,
-  scores = interactions(mats)$score
-)
-dat <- dat[order(size)]
-
-## Define threshold
-thresh <- 300e3
-
-## What perc of loops are >thresh
-tb <- table(dat$size > thresh)
-(tb[2] / sum(tb)) * 100
-
-## Filter out long (>2Mb) interactions
-dat <- dat[size <= thresh]
-
+## Calculate rolling enrichment at different window sizes
 ns <- round(seq(1, 200, length.out = 9))
 par(mfrow=c(3,3))
 for (n in ns) {
-  dat[, rollMeds := frollapply(scores, n=n, \(x) median(x), align='right')]
-  plot(dat$size, dat$rollMeds, type="l", main=paste0("n=", n))
+  ## Calculate rolling enrichment
+  re <- .rollEnrich(mats, scores=cp / bg[,1], k=n)
+  plot(re$rollMedSize, re$rollMedScore, type='l', main=paste0("n=", n))
+  
+  ## Fit loess curve to trend
+  lo <- loess(rollMedScore ~ rollMedSize, data = re)
+  lines(lo$x, predict(lo), col="blue")
 }
 par(mfrow=c(1,1))
-
-
-
-
