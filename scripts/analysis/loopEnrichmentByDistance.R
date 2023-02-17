@@ -71,15 +71,16 @@ interactions(mats)$size <- pairdist(mats)
 ## Visualize trend -------------------------------------------------------------
 
 ## Calculate rolling enrichment at different window sizes
+## and correcting them.
 ns <- round(seq(1, 200, length.out = 9))
 par(mfrow=c(3,3))
 for (n in ns) {
-  ## Calculate rolling enrichment
-  re <- .rollEnrich(mats, scores=cp / bg[,1], k=n)
-  plot(re$rollMedSize, re$rollMedScore, type='l', main=paste0("n=", n))
-  
-  ## Fit loess curve to trend
-  lo <- loess(rollMedScore ~ rollMedSize, data = re)
-  lines(lo$x, predict(lo), col="blue")
+  .correctEnrich(x=interactions(mats),
+                 scores=cp/bg[,1],
+                 k=n,
+                 nknots=10,
+                 plot=TRUE)
 }
 par(mfrow=c(1,1))
+
+

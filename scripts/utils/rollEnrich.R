@@ -1,5 +1,5 @@
 #' Calculate rolling windows of loop enrichment
-#' @param x InteractionArray Object.
+#' @param x GInteractions Object.
 #' @param scores Numeric vector of enrichment scores.
 #' @param k Number of observations for rolling window.
 #' @param thresh Numeric loop size cutoff (keeps loops)
